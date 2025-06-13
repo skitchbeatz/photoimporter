@@ -1,0 +1,15 @@
+[Unit]
+Description=Photo Importer Service
+After=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker run --rm \
+  -v /media/pi:/sd_card \
+  -v /home/pi/Pictures:/output \
+  -v /var/log/photo_importer.log:/var/log/photo_importer.log \
+  --name photo-importer \
+  photo-importer
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
