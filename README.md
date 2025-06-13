@@ -85,3 +85,28 @@ The service uses SHA-256 hashes to:
 1. Ensure file integrity after copying
 2. Skip duplicate files (even with same name/size)
 3. Send success/failure notifications
+
+## Future Considerations
+
+Planned enhancements for future versions:
+
+- **Web UI**: Browser-based interface for:
+  - Real-time import monitoring
+  - Historical statistics visualization
+  - Configuration management
+  - Manual import triggers
+
+- **Advanced Reporting**: Integration with tools like Grafana for:
+  - Import frequency tracking
+  - Daily photo/video counts
+  - Historical import statistics
+
+- **Extended Metrics**: Additional analytics on:
+  - Camera models used
+  - File type distributions
+  - Storage usage trends
+
+These features will build on the current notification system which already tracks:
+- File counts and sizes by type
+- Date ranges of imported content
+- Duplicate file detection

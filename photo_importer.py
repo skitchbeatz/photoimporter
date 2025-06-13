@@ -93,14 +93,10 @@ def process_file(file_path):
             if verify_file_integrity(file_path, dest_path):
                 logging.info(f"Verified {filename} in {dest_dir}")
                 run_post_import_hooks(dest_path)
-                requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", 
-                             data=f"Successfully imported {filename}".encode("utf-8"))
+                return True
             else:
                 logging.error(f"Verification failed for {filename}")
-                # Send error notification
-                requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", 
-                             data=f"VERIFICATION FAILED: {filename}".encode("utf-8"))
-            return True
+                return False
         else:
             logging.warning(f"Skipped {filename} (already exists in {dest_dir})")
             return False
@@ -108,10 +104,11 @@ def process_file(file_path):
         logging.error(f"Error processing {file_path}: {e}")
         return False
 
-def process_file_if_supported(file_path, processed_files):
+def process_file_if_supported(file_path, processed_files, batch_stats):
     """Process file if supported and not already processed"""
     # Skip already processed files
     if file_path in processed_files:
+        batch_stats['duplicates'] += 1
         return
     
     # Process supported file types
@@ -119,20 +116,43 @@ def process_file_if_supported(file_path, processed_files):
     if ext in SUPPORTED_EXTENSIONS:
         if process_file(file_path):
             processed_files.add(file_path)
+            batch_stats['total']['count'] += 1
+            batch_stats['total']['size'] += os.path.getsize(file_path)
+            batch_stats['dates'].append(get_file_date(file_path))
+            if ext in ['.jpg', '.jpeg', '.png']:
+                batch_stats['photos']['count'] += 1
+                batch_stats['photos']['size'] += os.path.getsize(file_path)
+            elif ext in ['.mp4', '.mov', '.avi', '.mts']:
+                batch_stats['videos']['count'] += 1
+                batch_stats['videos']['size'] += os.path.getsize(file_path)
+            elif ext in ['.cr2', '.arw']:
+                batch_stats['raw']['count'] += 1
+                batch_stats['raw']['size'] += os.path.getsize(file_path)
+
+def send_notification(message):
+    requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", data=message.encode("utf-8"))
 
 def monitor_sd_cards():
     """Monitor SD card mount point for new files"""
     processed_files = set()
-    
     while True:
         try:
+            # Initialize batch statistics
+            batch_stats = {
+                'total': {'count': 0, 'size': 0},
+                'photos': {'count': 0, 'size': 0},
+                'videos': {'count': 0, 'size': 0},
+                'raw': {'count': 0, 'size': 0},
+                'duplicates': 0,
+                'dates': []
+            }
+            
             # Check all mounted SD cards
             for card in os.listdir(SD_CARD_MOUNT):
                 card_path = os.path.join(SD_CARD_MOUNT, card)
                 
                 # Send notification when SD card detected
-                requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", 
-                             data=f"SD card detected: {card}".encode("utf-8"))
+                send_notification(f"SD card detected: {card}")
                 
                 # Process DCIM folder (photos)
                 dcim_path = os.path.join(card_path, "DCIM")
@@ -140,7 +160,7 @@ def monitor_sd_cards():
                     for root, _, files in os.walk(dcim_path):
                         for file in files:
                             file_path = os.path.join(root, file)
-                            process_file_if_supported(file_path, processed_files)
+                            process_file_if_supported(file_path, processed_files, batch_stats)
                 
                 # Process video folder (Sony specific)
                 video_path = os.path.join(card_path, "PRIVATE", "M4ROOT", "CLIP")
@@ -148,11 +168,30 @@ def monitor_sd_cards():
                     for root, _, files in os.walk(video_path):
                         for file in files:
                             file_path = os.path.join(root, file)
-                            process_file_if_supported(file_path, processed_files)
+                            process_file_if_supported(file_path, processed_files, batch_stats)
+            
+            # After processing batch, send notification with stats
+            if batch_stats['total']['count'] > 0 or batch_stats['duplicates'] > 0:
+                date_range = "N/A"
+                if batch_stats['dates']:
+                    dates = sorted(batch_stats['dates'])
+                    date_range = f"{dates[0]} to {dates[-1]}"
+                
+                message = (
+                    f"Imported {batch_stats['total']['count']} files ({batch_stats['total']['size']/1024/1024:.1f}MB)\n"
+                    f"Date range: {date_range}\n"
+                    f"Photos: {batch_stats['photos']['count']} ({batch_stats['photos']['size']/1024/1024:.1f}MB)\n"
+                    f"Videos: {batch_stats['videos']['count']} ({batch_stats['videos']['size']/1024/1024:.1f}MB)\n"
+                    f"RAW: {batch_stats['raw']['count']} ({batch_stats['raw']['size']/1024/1024:.1f}MB)\n"
+                    f"Duplicates skipped: {batch_stats['duplicates']}"
+                )
+                send_notification(message)
+                
+            time.sleep(SLEEP_INTERVAL)
+            
         except Exception as e:
-            logging.error(f"Monitoring error: {e}")
-        
-        time.sleep(SLEEP_INTERVAL)
+            logging.error(f"Error in monitor loop: {e}")
+            time.sleep(SLEEP_INTERVAL * 2)
 
 if __name__ == "__main__":
     logging.info("Starting photo importer service")
