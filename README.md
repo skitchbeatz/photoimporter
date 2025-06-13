@@ -16,52 +16,53 @@ This service automatically organizes photos and videos from SD cards by creation
    sudo apt install docker-compose-plugin
    ```
 
-2. **Create docker-compose.yml**:
-   ```yaml
-   version: '3.8'
+## Docker Compose Setup
 
-   services:
-     photo-importer:
-       image: yourusername/photo-importer:latest
-       restart: unless-stopped
-       environment:
-         # Required ntfy configuration
-         - NTFY_TOPIC=your_unique_topic_name
-         - NTFY_SERVER=https://ntfy.sh  # Change if using self-hosted server
-         
-         # Storage configuration
-         - SD_CARD_MOUNT=/media/pi
-         - DESTINATION_BASE=/home/pi/Pictures
-         - SLEEP_INTERVAL=60
-       volumes:
-         - /media/pi:/media/pi
-         - /home/pi/Pictures:/home/pi/Pictures
-         - /var/log/photo_importer.log:/var/log/photo_importer.log
-   ```
+1. Create a `docker-compose.yml` file:
+```yaml
+version: '3'
 
-3. **Run the service**:
-   ```bash
-   docker compose up -d
-   ```
+services:
+  photo-importer:
+    image: ghcr.io/skitchbeatz/photo-importer:latest
+    restart: unless-stopped
+    environment:
+      - NTFY_TOPIC=your_topic_name  # Only required if using notifications
+      - NTFY_SERVER=https://ntfy.sh  # Optional, defaults to ntfy.sh
+      - SD_CARD_MOUNT=/media/pi  # Default
+      - DESTINATION_BASE=/home/pi/Pictures  # Default
+    volumes:
+      - /media/pi:/media/pi
+      - /home/pi/Pictures:/home/pi/Pictures
+      - /var/log/photo_importer.log:/var/log/photo_importer.log
+```
 
-4. **View logs**:
-   ```bash
-   docker compose logs -f
-   ```
+2. Start the service:
+```bash
+docker-compose up -d
+```
 
-5. **Stop the service**:
-   ```bash
-   docker compose down
-   ```
+3. View logs:
+```bash
+docker-compose logs -f
+```
+
+4. Stop the service:
+```bash
+docker-compose down
+```
 
 ## Notification Setup
 
-Configure notifications by setting these required environment variables:
+Notifications are optional and use [ntfy.sh](https://ntfy.sh/):
 
-- `NTFY_TOPIC`: (Required) Your unique ntfy topic name
-- `NTFY_SERVER`: (Optional) Custom ntfy server URL (default: https://ntfy.sh)
+```yaml
+# Optional notification configuration
+- NTFY_TOPIC=your_topic_name  # Only required if using notifications
+- NTFY_SERVER=https://ntfy.sh  # Optional, defaults to ntfy.sh
+```
 
-No additional services are needed in the compose file - the photo importer handles notifications directly to the specified ntfy server.
+Without these variables, the service will run normally but skip notifications.
 
 ## How It Works
 

@@ -130,7 +130,20 @@ def process_file_if_supported(file_path, processed_files, batch_stats):
                 batch_stats['raw']['size'] += os.path.getsize(file_path)
 
 def send_notification(message):
-    requests.post(f"https://ntfy.sh/{NTFY_TOPIC}", data=message.encode("utf-8"))
+    """Send notification if NTFY_TOPIC is configured"""
+    if not os.getenv('NTFY_TOPIC'):
+        logging.info("Skipping notification (no NTFY_TOPIC configured)")
+        return
+    
+    try:
+        server = os.getenv('NTFY_SERVER', 'https://ntfy.sh')
+        requests.post(
+            f"{server}/{os.getenv('NTFY_TOPIC')}", 
+            data=message.encode("utf-8"),
+            timeout=5
+        )
+    except Exception as e:
+        logging.error(f"Notification failed: {e}")
 
 def monitor_sd_cards():
     """Monitor SD card mount point for new files"""

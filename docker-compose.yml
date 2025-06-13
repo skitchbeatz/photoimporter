@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  photo-importer:
+    image: ghcr.io/skitchbeatz/photo-importer:latest
+    restart: unless-stopped
+    environment:
+      - NTFY_TOPIC=${NTFY_TOPIC}
+      - NTFY_SERVER=${NTFY_SERVER}
+      - SD_CARD_MOUNT=${SD_CARD_MOUNT:-/media/pi}
+      - DESTINATION_BASE=${DESTINATION_BASE:-/home/pi/Pictures}
+    volumes:
+      - /media/pi:/media/pi
+      - /home/pi/Pictures:/home/pi/Pictures
+      - /var/log/photo_importer.log:/var/log/photo_importer.log
