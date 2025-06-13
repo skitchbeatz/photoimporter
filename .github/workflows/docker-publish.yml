@@ -4,9 +4,8 @@ on:
   push:
     branches: ['main']
     paths:
-      - 'src/**'
-      - 'Dockerfile'
-      - 'requirements.txt'
+      - '**'
+      - '!.github/**'
 
 jobs:
   push_to_registry:
