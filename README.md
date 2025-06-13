@@ -1,80 +1,67 @@
 # Photo Importer Service
 
-This service automatically organizes photos and videos from SD cards by creation date.
+This service automatically organizes photos and videos from SD cards by creation date using Docker.
 
-## Setup Instructions
+## Prerequisites
 
-1. **Install dependencies**:
+- Raspberry Pi with Docker installed
+- SD card reader connected
+
+## Docker Setup
+
+1. **Install Docker and Docker Compose** on Raspberry Pi:
    ```bash
-   sudo apt update
-   sudo apt install exiftool
+   curl -fsSL https://get.docker.com | sh
+   sudo usermod -aG docker pi
+   sudo apt install docker-compose-plugin
    ```
 
-2. **Copy files to Raspberry Pi**:
+2. **Create docker-compose.yml**:
+   ```yaml
+   version: '3.8'
+
+   services:
+     photo-importer:
+       image: yourusername/photo-importer:latest
+       restart: unless-stopped
+       environment:
+         # Required ntfy configuration
+         - NTFY_TOPIC=your_unique_topic_name
+         - NTFY_SERVER=https://ntfy.sh  # Change if using self-hosted server
+         
+         # Storage configuration
+         - SD_CARD_MOUNT=/media/pi
+         - DESTINATION_BASE=/home/pi/Pictures
+         - SLEEP_INTERVAL=60
+       volumes:
+         - /media/pi:/media/pi
+         - /home/pi/Pictures:/home/pi/Pictures
+         - /var/log/photo_importer.log:/var/log/photo_importer.log
+   ```
+
+3. **Run the service**:
    ```bash
-   scp -r /path/to/photo_importer pi@raspberrypi.local:/home/pi/
+   docker compose up -d
    ```
 
-3. **Install the service**:
+4. **View logs**:
    ```bash
-   sudo cp photo-importer.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   sudo systemctl enable photo-importer.service
-   sudo systemctl start photo-importer.service
+   docker compose logs -f
    ```
 
-4. **Verify it's running**:
+5. **Stop the service**:
    ```bash
-   sudo systemctl status photo-importer.service
+   docker compose down
    ```
 
-5. **View logs**:
-   ```bash
-   tail -f /var/log/photo_importer.log
-   ```
+## Notification Setup
 
-## GitHub Setup
+Configure notifications by setting these required environment variables:
 
-1. **Initialize repository**:
-   ```bash
-   cd photo_importer
-   git init
-   git add .
-   git commit -m "Initial commit"
-   ```
+- `NTFY_TOPIC`: (Required) Your unique ntfy topic name
+- `NTFY_SERVER`: (Optional) Custom ntfy server URL (default: https://ntfy.sh)
 
-2. **Create GitHub repository**:
-   - Go to GitHub.com → New repository
-   - Name: photo-importer
-   - Create repository
-
-3. **Connect local repository**:
-   ```bash
-   git remote add origin https://github.com/<your-username>/photo-importer.git
-   git push -u origin main
-   ```
-
-4. **Authenticate**:
-   - Use GitHub CLI: `gh auth login`
-   - Or generate SSH keys: `ssh-keygen -t ed25519`
-
-## ntfy Notification Setup
-
-1. **Install ntfy client**:
-   ```bash
-   sudo apt install ntfy
-   ```
-
-2. **Configure service**:
-   Edit `photo_importer.py`:
-   ```python
-   NTFY_TOPIC = "your_unique_topic_name"  # Set your ntfy topic
-   ```
-
-3. **Subscribe to notifications**:
-   ```bash
-   ntfy subscribe your_unique_topic_name
-   ```
+No additional services are needed in the compose file - the photo importer handles notifications directly to the specified ntfy server.
 
 ## How It Works
 
@@ -86,14 +73,15 @@ This service automatically organizes photos and videos from SD cards by creation
 
 ## Configuration
 
-Edit `photo_importer.py` to change:
-- `SD_CARD_MOUNT`: SD card mount point
-- `DESTINATION_BASE`: Destination directory
-- `SLEEP_INTERVAL`: Check interval (seconds)
+All configuration is done through environment variables in `docker-compose.yml`:
+
+- `SD_CARD_MOUNT`: SD card mount point (default: /media/pi)
+- `DESTINATION_BASE`: Destination directory (default: /home/pi/Pictures)
+- `SLEEP_INTERVAL`: Check interval in seconds (default: 60)
 
 ## File Verification
 
-The script now uses SHA-256 hashes to:
+The service uses SHA-256 hashes to:
 1. Ensure file integrity after copying
 2. Skip duplicate files (even with same name/size)
 3. Send success/failure notifications
