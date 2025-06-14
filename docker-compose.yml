@@ -2,13 +2,14 @@ version: '3'
 
 services:
   photo-importer:
-    image: ghcr.io/skitchbeatz/photo-importer:latest
+    container_name: photo-importer  # Forces consistent naming
+    build: .  # Build the Dockerfile in the current directory
     restart: unless-stopped
     environment:
       - NTFY_TOPIC=${NTFY_TOPIC}
       - NTFY_SERVER=${NTFY_SERVER}
-      - SD_CARD_MOUNT=${SD_CARD_MOUNT:-/media/pi}
-      - DESTINATION_BASE=${DESTINATION_BASE:-/home/pi/Pictures}
+      - SD_CARD_MOUNT=/test_media
+      - DESTINATION_BASE=/test_output
     logging:
       driver: "json-file"
       options:
@@ -16,6 +17,5 @@ services:
         max-file: "3"
     volumes:
       - ./logs:/app/logs
-      - /media/pi:/media/pi
-      - /home/pi/Pictures:/home/pi/Pictures
-      - /var/log/photo_importer.log:/var/log/photo_importer.log
+      - ./test_media:/test_media  # Local test directory
+      - ./test_output:/test_output  # Local output directory
