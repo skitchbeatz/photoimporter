@@ -27,9 +27,34 @@
 | `DESTINATION_BASE` | Output directory | `/home/pi/Pictures` | No |
 | `SLEEP_INTERVAL` | Check frequency (seconds) | `60` | No |
 
+## Notification System
+
+- Notifications are completely optional
+- Uses `ntfy.sh` by default (configurable via `NTFY_SERVER`)
+- Requires `NTFY_TOPIC` environment variable to be set to enable
+- Fails gracefully if:
+  - `requests` module is missing
+  - Network connectivity issues occur
+  - Notification server is unavailable
+- Logs all notification attempts and failures
+
+```python
+def send_notification(message):
+    """Sends notification if configured, fails silently if not"""
+    if not os.getenv('NTFY_TOPIC'):
+        return
+        
+    try:
+        import requests  # Local import for safety
+        requests.post(f"{os.getenv('NTFY_SERVER', 'https://ntfy.sh')}/{os.getenv('NTFY_TOPIC')}", 
+                     data=message,
+                     timeout=5)
+    except Exception as e:
+        logger.warning(f"Notification failed (will continue without): {str(e)}")
+```
+
 ## Development Notes
 
 - **Image Building**: Uses Docker BuildKit
 - **Logging**: Output to `/var/log/photo_importer.log`
 - **File Handling**: SHA-256 verification for file integrity
-- **Notification System**: Uses ntfy's simple HTTP API

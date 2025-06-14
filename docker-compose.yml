@@ -9,7 +9,13 @@ services:
       - NTFY_SERVER=${NTFY_SERVER}
       - SD_CARD_MOUNT=${SD_CARD_MOUNT:-/media/pi}
       - DESTINATION_BASE=${DESTINATION_BASE:-/home/pi/Pictures}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
+      - ./logs:/app/logs
       - /media/pi:/media/pi
       - /home/pi/Pictures:/home/pi/Pictures
       - /var/log/photo_importer.log:/var/log/photo_importer.log

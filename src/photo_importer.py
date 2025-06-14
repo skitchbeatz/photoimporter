@@ -1,14 +1,47 @@
 import os
 import time
 import logging
+from logging.handlers import RotatingFileHandler
 from .utils import date_extractor, file_utils
+import subprocess
 
-# Initialize logging
-logging.basicConfig(
-    filename='/var/log/photo_importer.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+# Configure logging
+log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+
+# Main logger
+logger = logging.getLogger('photo_importer')
+logger.setLevel(logging.DEBUG)
+
+# File handler (rotating logs)
+file_handler = RotatingFileHandler(
+    '/app/logs/photo_importer.log',
+    maxBytes=5*1024*1024,  # 5MB
+    backupCount=3
 )
+file_handler.setFormatter(log_formatter)
+logger.addHandler(file_handler)
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+logger.addHandler(console_handler)
+
+logger.info('Application started')
+
+def send_notification(message):
+    """Sends notification if configured, fails silently if not"""
+    if not os.getenv('NTFY_TOPIC'):
+        return
+        
+    try:
+        import requests  # Local import for safety
+        topic = os.getenv('NTFY_TOPIC')
+        server = os.getenv('NTFY_SERVER', 'https://ntfy.sh')
+        requests.post(f"{server}/{topic}", 
+                     data=message,
+                     timeout=5)
+    except Exception as e:
+        logger.warning(f"Notification failed (will continue without): {str(e)}")
 
 def monitor_sd_cards():
     """Main function to monitor SD card mount point"""
@@ -27,9 +60,9 @@ def run_post_import_hooks(file_path: str) -> None:
         if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
             try:
                 subprocess.run([hook_path, file_path], check=True)
-                logging.info(f"Ran hook {hook} for {file_path}")
+                logger.info(f"Ran hook {hook} for {file_path}")
             except Exception as e:
-                logging.error(f"Hook {hook} failed: {str(e)}")
+                logger.error(f"Hook {hook} failed: {str(e)}")
 
 if __name__ == "__main__":
     monitor_sd_cards()
