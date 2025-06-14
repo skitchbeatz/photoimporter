@@ -28,26 +28,11 @@ logger.addHandler(console_handler)
 
 logger.info('Application started')
 
-def send_notification(message):
-    """Sends notification if configured, fails silently if not"""
-    if not os.getenv('NTFY_TOPIC'):
-        return
-        
-    try:
-        import requests  # Local import for safety
-        topic = os.getenv('NTFY_TOPIC')
-        server = os.getenv('NTFY_SERVER', 'https://ntfy.sh')
-        requests.post(f"{server}/{topic}", 
-                     data=message,
-                     timeout=5)
-    except Exception as e:
-        logger.warning(f"Notification failed (will continue without): {str(e)}")
-
 def monitor_sd_cards():
     """Main function to monitor SD card mount point"""
     while True:
         # SD card detection logic will go here
-        time.sleep(10)
+        time.sleep(5)
 
 def run_post_import_hooks(file_path: str) -> None:
     """Run all post-import hooks for a file"""

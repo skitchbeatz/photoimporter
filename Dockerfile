@@ -10,8 +10,8 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for caching
-COPY requirements.txt .
+# Copy core requirements
+COPY requirements-core.txt requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -26,7 +26,11 @@ RUN if [ "$ENABLE_NOTIFICATIONS" = "true" ]; then \
     fi
 
 # Copy application code
-COPY . .
+COPY src/ ./src/
+COPY setup.py .
+
+# Install application
+RUN pip install -e .
 
 # Final stage
 FROM python:${PYTHON_VERSION}
@@ -45,4 +49,4 @@ ENV DESTINATION_BASE=/output
 RUN mkdir -p ${SD_CARD_MOUNT} ${DESTINATION_BASE}
 
 # Set entrypoint
-ENTRYPOINT ["python", "photo_importer.py"]
+CMD ["python", "-m", "src.photo_importer"]

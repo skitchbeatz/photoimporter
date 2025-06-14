@@ -1,6 +1,1 @@
-# Core requirements
-python-dotenv
-
-# Optional notification dependencies
-requests>=2.31.0  # For notification support
-ntfy>=1.0.0       # For notification support
+requests
