@@ -27,6 +27,12 @@
 | `DESTINATION_BASE` | Output directory | `/home/pi/Pictures` | No |
 | `SLEEP_INTERVAL` | Check frequency (seconds) | `60` | No |
 
+## Dependencies
+- **Core**: python-dotenv (required)
+- **Optional**: 
+  - requests>=2.31.0 (for notifications)
+  - ntfy>=1.0.0 (for notifications)
+
 ## Notification System
 
 - Notifications are completely optional

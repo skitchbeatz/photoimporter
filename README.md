@@ -52,6 +52,13 @@ docker-compose logs -f
 docker-compose down
 ```
 
+## Optional Features
+
+### Notifications
+To enable notifications:
+1. Set `ENABLE_NOTIFICATIONS=true` during build
+2. Configure `NTFY_TOPIC` and optionally `NTFY_SERVER` environment variables
+
 ## Notification Setup
 
 Notifications are optional and use [ntfy.sh](https://ntfy.sh/):

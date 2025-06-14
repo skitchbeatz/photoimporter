@@ -16,6 +16,15 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install core dependencies (always required)
+RUN pip install --no-cache-dir python-dotenv
+
+# Conditionally install notification dependencies if enabled
+ARG ENABLE_NOTIFICATIONS=false
+RUN if [ "$ENABLE_NOTIFICATIONS" = "true" ]; then \
+    pip install --no-cache-dir requests ntfy; \
+    fi
+
 # Copy application code
 COPY . .
 
