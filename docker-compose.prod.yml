@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  photo-importer:
+    container_name: photo-importer
+    build: .  # Build the image from the Dockerfile in the current directory
+    restart: unless-stopped
+    environment:
+      # These are the paths INSIDE the container.
+      # The Dockerfile provides defaults, but we confirm them here.
+      - SD_CARD_MOUNT=/sd_card
+      - DESTINATION_BASE=/pictures
+      # Optional: Set a different check interval (in seconds)
+      - SLEEP_INTERVAL=60
+      # --- NOTIFICATION SETTINGS (leave blank if not used) ---
+      - NTFY_TOPIC=
+      - NTFY_SERVER=
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      # Mount a local directory for logs
+      - ./logs:/app/logs
+      # Mount the Raspberry Pi's SD card mount point to the container's input directory
+      - /media/pi:/sd_card
+      # Mount the Raspberry Pi's Pictures directory to the container's output directory
+      - /home/pi/Pictures:/pictures
