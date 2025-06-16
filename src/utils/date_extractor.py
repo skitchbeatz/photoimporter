@@ -1,22 +1,39 @@
 import os
 import subprocess
 from datetime import datetime
+import logging
 
-def get_creation_date(file_path):
-    """Extract creation date with EXIF, filesystem, and filename fallbacks"""
+logger = logging.getLogger('photo_importer.date_extractor')
+
+def get_creation_date(file_path: str) -> datetime | None:
+    """
+    Extract creation date from media file metadata.
+    Tries EXIF 'CreateDate', then falls back to filesystem 'mtime'.
+    """
+    # 1. Try to get the creation date from EXIF metadata
     try:
-        # EXIF metadata extraction
-        exif = subprocess.check_output(['exiftool', '-CreateDate', file_path])
-        if exif:
-            return parse_exif_date(exif)
-    except Exception:
-        pass
-    
-    # Filesystem metadata fallback
-    file_stat = os.stat(file_path)
-    return datetime.fromtimestamp(file_stat.st_ctime)
+        # The '-d' option formats the date for easier parsing
+        command = ['exiftool', '-s3', '-d', '%Y-%m-%d %H:%M:%S', '-CreateDate', file_path]
+        result = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT).strip()
+        if result:
+            logger.debug(f"EXIF CreateDate for {os.path.basename(file_path)}: {result}")
+            return datetime.strptime(result, '%Y-%m-%d %H:%M:%S')
+    except subprocess.CalledProcessError as e:
+        # Log the specific error output from exiftool
+        error_output = e.output.strip()
+        logger.warning(f"Could not get EXIF CreateDate for {os.path.basename(file_path)}. exiftool output: {error_output}")
+    except FileNotFoundError:
+        logger.error("exiftool not found. Please ensure it is installed and in the system's PATH.")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred with exiftool for {os.path.basename(file_path)}: {e}")
 
-def parse_exif_date(exif_output):
-    """Parse exiftool date output"""
-    # Implementation details
-    return datetime.now()  # Placeholder
+    # 2. Fallback to filesystem modification time
+    try:
+        mtime = os.path.getmtime(file_path)
+        dt_object = datetime.fromtimestamp(mtime)
+        logger.warning(f"Falling back to filesystem mtime for {os.path.basename(file_path)}: {dt_object.strftime('%Y-%m-%d %H:%M:%S')}")
+        return dt_object
+    except Exception as e:
+        logger.error(f"Could not get filesystem mtime for {os.path.basename(file_path)}: {e}")
+
+    return None
