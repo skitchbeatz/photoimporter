@@ -2,10 +2,7 @@
 ARG PYTHON_VERSION=3.11-slim
 FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION} as build
 
-# Install cross-platform dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends exiftool && \
-    rm -rf /var/lib/apt/lists/*
+
 
 # Set working directory
 WORKDIR /app
@@ -35,18 +32,22 @@ RUN pip install -e .
 # Final stage
 FROM python:${PYTHON_VERSION}
 
-# Copy from build stage
-COPY --from=build /usr/bin/exiftool /usr/bin/exiftool
+# Install runtime dependencies (exiftool)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends exiftool && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy application from build stage
 COPY --from=build /app /app
 
 WORKDIR /app
 
-# Set environment variables
+# Set environment variables from docker-compose, but provide sane defaults
 ENV SD_CARD_MOUNT=/sd_card
 ENV DESTINATION_BASE=/output
 
-# Create mount points
+# Create mount points inside the container
 RUN mkdir -p ${SD_CARD_MOUNT} ${DESTINATION_BASE}
 
-# Set entrypoint
+# Command to run the application
 CMD ["python", "-m", "src.photo_importer"]

@@ -20,3 +20,32 @@
 2025-06-16 19:28:46,348 - INFO - photo_importer.file_utils - Scanning for media files in /test_media...
 2025-06-16 19:29:46,447 - INFO - photo_importer.file_utils - Scanning for media files in /test_media...
 2025-06-16 19:30:46,538 - INFO - photo_importer.file_utils - Scanning for media files in /test_media...
+2025-06-16 20:25:17,627 - INFO - photo_importer - Photo Importer service started.
+2025-06-16 20:25:17,627 - INFO - photo_importer - Watching for SD cards at: /sd_card
+2025-06-16 20:25:17,628 - INFO - photo_importer - Importing photos to: /output
+2025-06-16 20:25:17,628 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
+2025-06-16 20:26:17,630 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
+2025-06-16 20:26:17,651 - WARNING - photo_importer.date_extractor - Could not get EXIF CreateDate for DSC03562.JPG. exiftool output: Can't locate Image/ExifTool.pm in @INC (you may need to install the Image::ExifTool module) (@INC contains: /usr/bin/lib /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/aarch64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/bin/exiftool line 40.
+BEGIN failed--compilation aborted at /usr/bin/exiftool line 40.
+2025-06-16 20:26:17,652 - WARNING - photo_importer.date_extractor - Falling back to filesystem mtime for DSC03562.JPG: 2025-06-13 19:27:50
+2025-06-16 20:26:17,663 - INFO - photo_importer.file_utils - Copied DSC03562.JPG to /output/2025/06-13/DSC03562.JPG
+2025-06-16 20:26:17,738 - WARNING - photo_importer.date_extractor - Could not get EXIF CreateDate for C0001.MP4. exiftool output: Can't locate Image/ExifTool.pm in @INC (you may need to install the Image::ExifTool module) (@INC contains: /usr/bin/lib /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/aarch64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/bin/exiftool line 40.
+BEGIN failed--compilation aborted at /usr/bin/exiftool line 40.
+2025-06-16 20:26:17,739 - WARNING - photo_importer.date_extractor - Falling back to filesystem mtime for C0001.MP4: 2025-06-13 19:27:42
+2025-06-16 20:26:17,822 - INFO - photo_importer.file_utils - Copied C0001.MP4 to /output/2025/06-13/C0001.MP4
+2025-06-16 20:26:17,828 - WARNING - photo_importer.date_extractor - Could not get EXIF CreateDate for C0001T01.JPG. exiftool output: Can't locate Image/ExifTool.pm in @INC (you may need to install the Image::ExifTool module) (@INC contains: /usr/bin/lib /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/aarch64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/bin/exiftool line 40.
+BEGIN failed--compilation aborted at /usr/bin/exiftool line 40.
+2025-06-16 20:26:17,828 - WARNING - photo_importer.date_extractor - Falling back to filesystem mtime for C0001T01.JPG: 2025-06-13 19:27:32
+2025-06-16 20:26:17,832 - INFO - photo_importer.file_utils - Copied C0001T01.JPG to /output/2025/06-13/C0001T01.JPG
+2025-06-16 20:26:17,833 - INFO - photo_importer - Successfully imported 3 new files.
+2025-06-16 20:27:17,838 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
+2025-06-16 20:28:17,943 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
+2025-06-16 20:28:39,675 - INFO - photo_importer - Photo Importer service started.
+2025-06-16 20:28:39,675 - INFO - photo_importer - Watching for SD cards at: /sd_card
+2025-06-16 20:28:39,675 - INFO - photo_importer - Importing photos to: /output
+2025-06-16 20:28:39,676 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
+2025-06-16 20:28:39,757 - INFO - photo_importer.file_utils - Copied DSC03562.JPG to /output/2025/06-13/DSC03562.JPG
+2025-06-16 20:28:39,961 - INFO - photo_importer.file_utils - Copied C0001.MP4 to /output/2025/06-13/C0001.MP4
+2025-06-16 20:28:39,998 - INFO - photo_importer.file_utils - Copied C0001T01.JPG to /output/2025/06-13/C0001T01.JPG
+2025-06-16 20:28:39,998 - INFO - photo_importer - Successfully imported 3 new files.
+2025-06-16 20:29:39,999 - INFO - photo_importer.file_utils - Scanning for media files in /sd_card...
