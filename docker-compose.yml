@@ -1,21 +1,34 @@
-version: '3'
+version: '3.8'
 
 services:
   photo-importer:
-    container_name: photo-importer  # Forces consistent naming
-    build: .  # Build the Dockerfile in the current directory
+    build:
+      context: .
+    container_name: photo-importer
     restart: unless-stopped
-    environment:
-      - NTFY_TOPIC=${NTFY_TOPIC}
-      - NTFY_SERVER=${NTFY_SERVER}
-      - SD_CARD_MOUNT=/test_media
-      - DESTINATION_BASE=/test_output
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    environment:
+      - SD_CARD_MOUNT=/sd_card
+      - DESTINATION_BASE=/output
+      - SLEEP_INTERVAL=60
+      - NTFY_TOPIC=
+      - NTFY_SERVER=
     volumes:
+      # === CONFIGURATION: Choose ONE section below ===
+
+      # --- Option 1: For Raspberry Pi Deployment ---
+      # To use this, COMMENT OUT Option 2 below and UNCOMMENT the following 3 lines.
+      # Make sure the host paths (/media/pi, /home/pi/Pictures) are correct for your Pi.
+      # - /media/pi:/sd_card
+      # - /home/pi/Pictures:/output
+      # - ./logs:/app/logs
+
+      # --- Option 2: For Local Testing (Default) ---
+      # To use this, ensure Option 1 is commented out.
+      - ./test_media:/sd_card
+      - ./test_output:/output
       - ./logs:/app/logs
-      - ./test_media:/test_media  # Local test directory
-      - ./test_output:/test_output  # Local output directory
