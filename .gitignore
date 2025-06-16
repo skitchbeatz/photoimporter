@@ -1,13 +1,13 @@
-# Ignore Python artifacts
+# Python
 __pycache__/
 *.pyc
 
-# Ignore log files
+# Logs
 logs/
 
-# Ignore local testing directories and their contents
-/test_media/*
-/test_output/*
+# Local Testing
+/test_media/
+/test_output/
 
-# Ignore macOS system files
+# macOS
 .DS_Store

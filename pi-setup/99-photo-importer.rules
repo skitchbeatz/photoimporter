@@ -1,0 +1,3 @@
+# Udev rule to automatically trigger the photo importer when an SD card is inserted.
+# This rule detects a new partition on a removable usb-storage device.
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z][0-9]", SUBSYSTEMS=="usb", RUN+="/usr/local/bin/trigger-photo-import.sh"

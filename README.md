@@ -58,6 +58,35 @@ This project uses a single `docker-compose.yml` file that is configured for two 
 
 ---
 
+### Raspberry Pi: Automating Imports on SD Card Insertion
+
+To make the importer truly automatic, you can configure your Raspberry Pi to automatically trigger the import whenever an SD card is inserted. This is the recommended setup and avoids issues with Docker's volume cache.
+
+1.  **Copy the `udev` files to your Pi**:
+    First, push the new `pi-setup` directory to your Git repository and pull it on your Pi. Then, copy the files to the correct system locations:
+    ```bash
+    # Copy the trigger script
+    sudo cp pi-setup/trigger-photo-import.sh /usr/local/bin/
+
+    # Copy the udev rule
+    sudo cp pi-setup/99-photo-importer.rules /etc/udev/rules.d/
+    ```
+
+2.  **Make the Script Executable**:
+    ```bash
+    sudo chmod +x /usr/local/bin/trigger-photo-import.sh
+    ```
+
+3.  **Reload the `udev` Rules**:
+    Apply the new rule without needing to reboot:
+    ```bash
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+    ```
+
+Now, whenever you insert an SD card, the `udev` rule will wait 10 seconds and then automatically restart the `photo-importer` container. The container will start, scan the newly mounted card, and import your photos.
+
+---
+
 ### Stopping the Service
 
 To stop the container in either environment, navigate to the project directory and run:
